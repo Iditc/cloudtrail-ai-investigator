@@ -1,0 +1,4 @@
+# Day 1-2: AWS access and config. More packages are added as later days need them.
+# [crt] is required for credentials from `aws login`
+boto3[crt]==1.43.118
+python-dotenv==1.0.1

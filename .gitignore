@@ -1,0 +1,16 @@
+# Secrets
+.env
+
+# Data and local vector DB (never committed)
+data/
+chroma_db/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
