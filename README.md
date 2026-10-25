@@ -1,4 +1,4 @@
-# CloudTrail Detective
+# CloudTrail AI Investigator
 
 An AI agent that answers natural-language questions about AWS CloudTrail logs.
 It writes SQL, runs it on Athena, explains suspicious events with RAG, and is exposed to Claude Desktop through MCP.
