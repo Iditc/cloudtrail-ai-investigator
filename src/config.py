@@ -15,8 +15,11 @@ DATA_DIR = PROJECT_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
 LOGS_ARCHIVE = RAW_DIR / "flaws_cloudtrail_logs.tar"
 LOGS_EXTRACTED_DIR = RAW_DIR / "extracted"
+PROCESSED_DIR = DATA_DIR / "processed"
+EVENTS_PARQUET = PROCESSED_DIR / "cloudtrail_events.parquet"
 DOCS_DIR = DATA_DIR / "docs"
 RESULTS_DIR = PROJECT_ROOT / "results"
+FIGURES_DIR = RESULTS_DIR / "figures"
 
 # AWS settings
 AWS_REGION = os.getenv("AWS_REGION", "eu-north-1")

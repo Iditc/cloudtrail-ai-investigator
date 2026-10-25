@@ -10,7 +10,7 @@ Learning project covering: Agents, AWS (S3, Athena, IAM, Bedrock), MCP, LLM, RAG
 ## Data
 
 Public CloudTrail logs from [flaws.cloud](http://flaws.cloud) by Summit Route
-(20 files, 1,939,207 real events from 2017, including attack attempts).
+(20 files, 1,939,207 real events from Feb 2017 to Oct 2020, including attack attempts).
 
 ## Progress
 
