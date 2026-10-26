@@ -78,9 +78,9 @@ def q3_top_ips_run_instances(df: pd.DataFrame) -> None:
     Hint: same pattern as q2, on a different column, plus .head(5).
     """
     print_header("Q3: Top 5 IPs for RunInstances")
-    # TODO: write your pandas code here and print the result
-    print("Not implemented yet")
-
+    run = df[df["eventName"] == "RunInstances"]
+    top_ips = run["sourceIPAddress"].value_counts().head(5)
+    print(top_ips.to_string())
 
 def q4_run_instances_per_day(df: pd.DataFrame) -> None:
     """Q4 (your exercise): when did the RunInstances wave start?
@@ -97,11 +97,9 @@ def q4_run_instances_per_day(df: pd.DataFrame) -> None:
     days, then pass the daily series to save_daily_plot().
     """
     print_header("Q4: RunInstances per day")
-    # TODO: build a Series indexed by day with the number of calls per day
-    daily = None
-    if daily is None:
-        print("Not implemented yet")
-        return
+    run = df[df["eventName"] == "RunInstances"]
+    daily = run.set_index("eventTime").resample("D").size()
+    print(daily.sort_values(ascending=False).head(10).to_string())
     save_daily_plot(daily, "RunInstances calls per day", "run_instances_per_day.png")
 
 
