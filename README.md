@@ -1,10 +1,10 @@
 # CloudTrail AI Investigator
 
 An AI agent that answers natural-language questions about AWS CloudTrail logs.
-It writes SQL, runs it on Athena, and explains what it finds in plain English.
-Planned next: background knowledge with RAG, and access from Claude Desktop through MCP.
+It writes SQL, runs it on Athena, looks up background knowledge with RAG, and
+explains what it finds in plain English. Its tools are also exposed through an MCP server.
 
-Learning project covering: Agents, AWS (S3, Athena, IAM, Bedrock), MCP, LLM, RAG, and a vector DB.
+Learning project covering: Agents, AWS (S3, Athena, IAM), MCP, LLM, RAG, and a vector DB (Chroma).
 
 > Work in progress. Results, diagram and demo will be added as the project progresses.
 
@@ -53,26 +53,35 @@ turn off logging to hide their tracks, and was blocked. By contrast, a successfu
 owner doing maintenance. The same kind of action means different things depending
 on *who* did it and *whether it succeeded*.
 
-## Architecture (current state, day 3)
+## Architecture (current state, day 5)
 
 ```mermaid
 flowchart TB
     Q["Analyst question"] --> C
 
     subgraph LOOP["Agent loop (investigator.py)"]
-        C["Claude Sonnet 5.5"] -- "SQL" --> T["run_sql tool"]
+        C["Claude Sonnet 5.5"] -- "SQL" --> T["run_sql"]
         T -- "rows or error" --> C
+        C -- "query" --> R["search_docs"]
+        R -- "4 chunks" --> C
     end
 
     T --> ATH["Amazon Athena"]
     ATH --> S3[("S3: 1.9M events")]
+    R --> V[("Chroma: 112 chunks")]
     C -- "final answer" --> A["Answer with evidence"]
 ```
 
-**How the loop works:** Claude decides when to query. Each `run_sql` call returns
-either the result rows or Athena's error message. Claude reads it, then either
-fixes the SQL, runs another query, or writes the final answer. A safety limit
-stops the loop after 8 steps, and the tool only accepts `SELECT` queries.
+**How the loop works:** Claude decides which tool to call and when.
+`run_sql` returns facts: the result rows, or Athena's error message so Claude can
+fix the SQL. `search_docs` returns meaning: who an identity is, what an error code
+means, which MITRE ATT&CK technique fits. When Claude has enough, it writes the
+final answer. A safety limit stops the loop after 8 steps, and `run_sql` only
+accepts `SELECT` queries.
+
+**MCP server** (`src/mcp_server/server.py`): exposes `run_sql`, `search_docs` and
+`investigate` (the whole agent) to any MCP host over stdio. The host's own model
+then decides when to call them. Tested with `src/mcp_server/try_client.py`.
 
 **Data preparation and manual exploration** (used to validate the agent):
 
@@ -109,6 +118,30 @@ agent calls Claude through the Anthropic API instead; Athena and S3 still run on
 `src/agent/investigator.py`: Claude gets a `run_sql` tool and runs as many
 queries as it needs, then answers in plain English.
 
+### Day 4: RAG with a vector DB ✅
+- Knowledge base: two short hand-written docs in `knowledge/` (dataset context and
+  identities, how to read CloudTrail error codes and actions) plus the 104 MITRE
+  ATT&CK techniques for cloud infrastructure (IaaS), from the official `mitre/cti` data.
+- `src/rag/build_index.py` embeds them (all-MiniLM-L6-v2) into a local Chroma
+  index of 112 chunks. `src/tools/rag_tool.py` searches it by meaning.
+- The agent got a second tool, `search_docs`, and decides when to use it.
+- The knowledge base contains only general context, **not** our findings, so the
+  agent cannot "look up" the answers to the evaluation questions.
+
+**Lessons:**
+- **An up-to-date source beats model memory.** The model "remembered" logging
+  tampering as MITRE T1562.008; the current ATT&CK data shows it is revoked and
+  replaced by T1685.002.
+- **Retrieval is imperfect.** For "thousands of RunInstances calls" the small
+  embedding model ranked denial-of-service above Resource Hijacking (T1496).
+- **The agent is not deterministic.** The same question can lead to a different
+  search, so the right context is not always retrieved. This is why day 6 measures
+  the agent on many questions instead of judging single runs.
+
+### Day 5: MCP server ✅
+`src/mcp_server/server.py` (MCP Python SDK 2.x, stdio). Over stdio, stdout carries
+the MCP messages, so the tools' progress prints are redirected to stderr.
+
 ## Validation: agent vs. manual analysis
 
 Before trusting the agent, each question was first answered by hand in pandas.
@@ -128,3 +161,7 @@ The agent's answers were then compared with those results.
   owner doing maintenance, because flaws.cloud is a CTF and Root is the owner.
   The agent had no way to know that. This is the motivation for day 4: give the
   agent background knowledge with RAG.
+- **With RAG (day 4)**, when the agent retrieved the dataset context it described
+  Root's `DeleteTrail` as possibly the owner's own maintenance, and named the MITRE
+  technique with its source. When its search did not retrieve the identities
+  section, it still called it the main concern.
