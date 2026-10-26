@@ -79,17 +79,23 @@ def execute_search_docs(tool_input: dict) -> tuple[str, bool]:
 TOOL_FUNCTIONS = {"run_sql": execute_run_sql, "search_docs": execute_search_docs}
 
 
+# Models that accept the server-side refusal fallback (Haiku does not)
+FALLBACK_MODELS = {"claude-sonnet-5-5", "claude-opus-5-5"}
+
+
 def call_claude(client: anthropic.Anthropic, messages: list):
     """Send the conversation so far to Claude, with both tools available."""
+    extra = {}
+    if config.CLAUDE_MODEL in FALLBACK_MODELS:
+        extra = {"betas": ["server-side-fallback-2026-07-01"], "fallbacks": "default"}
     return client.beta.messages.create(
         model=config.CLAUDE_MODEL,
         max_tokens=16000,
         output_config={"effort": "medium"},  # multi-step tool use: medium is a good start
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
         system=AGENT_SYSTEM_PROMPT,
         tools=[RUN_SQL_TOOL, SEARCH_DOCS_TOOL],
         messages=messages,
+        **extra,
     )
 
 

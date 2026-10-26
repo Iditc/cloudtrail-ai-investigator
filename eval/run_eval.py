@@ -5,9 +5,11 @@ Scoring: a question passes when every expected fact appears in the answer
 match inside '2019'. Also records steps, tool calls, tokens, cost and time.
 
 Run from the project root:
-    python eval/run_eval.py              # all questions
-    python eval/run_eval.py q01 q06      # only some questions
+    python eval/run_eval.py                                # all questions, default model
+    python eval/run_eval.py q01 q06                        # only some questions
+    python eval/run_eval.py --model claude-haiku-5-5       # another model
 """
+import argparse
 import contextlib
 import io
 import json
@@ -23,7 +25,6 @@ import config  # noqa: E402
 from agent.investigator import run_agent  # noqa: E402
 
 EXPECTED_PATH = EVAL_DIR / "expected.json"
-RESULTS_PATH = config.RESULTS_DIR / "eval_results.json"
 
 # USD per 1M tokens (input, output), Claude API list prices
 PRICES = {"claude-sonnet-5-5": (2.00, 10.00), "claude-haiku-5-5": (0.10, 0.50),
@@ -59,7 +60,7 @@ def run_question(item: dict) -> dict:
     price_in, price_out = PRICES[config.CLAUDE_MODEL]
     cost = (run["input_tokens"] * price_in + run["output_tokens"] * price_out) / 1e6
     return {**item, **run, "found": found, "passed": all(found),
-            "seconds": round(time.time() - start, 1), "cost_usd": round(cost, 4)}
+            "seconds": round(time.time() - start, 1), "cost_usd": round(cost, 5)}
 
 
 def summarize(results: list[dict]) -> dict:
@@ -74,25 +75,36 @@ def summarize(results: list[dict]) -> dict:
             "avg_steps": round(sum(r["steps"] for r in results) / n, 1)}
 
 
+def parse_args() -> argparse.Namespace:
+    """Command line: optional question ids and an optional model name."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("ids", nargs="*", help="question ids to run (default: all)")
+    parser.add_argument("--model", default=config.CLAUDE_MODEL, choices=sorted(PRICES))
+    return parser.parse_args()
+
+
 def main() -> None:
     """Run the selected questions, print a table and save all results."""
+    args = parse_args()
+    config.CLAUDE_MODEL = args.model  # the agent reads the model from config at call time
     items = json.loads(EXPECTED_PATH.read_text(encoding="utf-8"))
-    if len(sys.argv) > 1:
-        items = [i for i in items if i["id"] in sys.argv[1:]]
+    if args.ids:
+        items = [i for i in items if i["id"] in args.ids]
+    results_path = config.RESULTS_DIR / f"eval_{args.model}.json"
     results = []
     for item in items:
         r = run_question(item)
         results.append(r)
         mark = "PASS" if r["passed"] else "FAIL"
         print(f"{r['id']}  {mark}  facts {sum(r['found'])}/{len(r['found'])}  "
-              f"steps {r['steps']}  {r['seconds']:>5}s  ${r['cost_usd']:.3f}  {r['question'][:55]}")
+              f"steps {r['steps']}  {r['seconds']:>5}s  ${r["cost_usd"]:.4f}  {r['question'][:55]}")
     summary = summarize(results)
     print(f"\n{json.dumps(summary, indent=2)}")
     config.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    RESULTS_PATH.write_text(json.dumps({"run_at": datetime.now().isoformat(timespec="seconds"),
+    results_path.write_text(json.dumps({"run_at": datetime.now().isoformat(timespec="seconds"),
                                         "summary": summary, "results": results}, indent=2),
                             encoding="utf-8")
-    print(f"Saved to {RESULTS_PATH}")
+    print(f"Saved to {results_path}")
 
 
 if __name__ == "__main__":
