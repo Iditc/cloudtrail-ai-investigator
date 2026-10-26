@@ -26,8 +26,10 @@ only read the logging configuration; an attacker uses them to check whether they
 - Calls spread across many unrelated services in a short time usually come from automated enumeration tools.
 
 ## Resource abuse
-A burst of RunInstances calls, often together with DescribeSpotPriceHistory, is a common sign that stolen keys
-are being used to launch servers for cryptocurrency mining. This maps to MITRE ATT&CK T1496 (Resource Hijacking).
+RunInstances is the API call that launches EC2 instances (virtual servers). A burst of RunInstances calls,
+often together with DescribeSpotPriceHistory, is a common sign that stolen keys are being used to launch
+many servers for cryptocurrency mining or other compute abuse. This maps to MITRE ATT&CK T1496
+(Resource Hijacking), and T1496.001 (Compute Hijacking).
 
 ## User agents
 - console.amazonaws.com or names like [S3Console]: a person using the AWS web console.
