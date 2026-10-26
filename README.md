@@ -182,6 +182,47 @@ Vector search alone missed technical names such as `AccessDenied` and
 and is now the agent's default. One query still fails with every method: "someone
 launched many EC2 instances" has no technical keyword and its meaning is too vague.
 
+### Day 8: hidden failures ✅
+The agent scored 30/30, so instead of analysing visible errors, day 8 looked for
+failures the main evaluation could hide.
+
+**1. Fixing the retrieval miss (document expansion).** The knowledge doc described
+`RunInstances` without the words people actually use. Adding natural vocabulary
+("EC2 instances", "virtual servers", "compute hijacking") fixed the miss.
+
+| Search method | Recall@4 before | Recall@4 after |
+|---|---|---|
+| Vector | 0.83 | 0.89 |
+| BM25 | 0.89 | 0.94 |
+| Hybrid | 0.94 | **1.00** |
+
+Because the doc was changed after seeing the miss, 1.00 is optimistic. So 8 new
+**held-out** queries were written that were never used for tuning: hybrid search put
+the right chunk first on all 8. Caveat: they were written by someone who knows the
+docs (author bias), so real analyst questions may be harder.
+
+**2. Consistency (`eval/consistency.py`).** Every question was run 3 times on Haiku 5.5
+(90 runs, $0.08).
+- **Answers were stable:** 90/90 runs passed.
+- **Paths were not:** on 12 of 30 questions the number of steps changed between runs
+  (from 2 up to 6), and so did whether the agent searched the knowledge base.
+  The same question can cost and take different amounts from run to run.
+
+**3. A real bug, found by running more.** In one run the agent wrote SQL with a
+syntax error. Athena rejects syntax errors **at submission** (`InvalidRequestException`),
+not while running, and the tool only handled failures that happen while running.
+So instead of returning the error to Claude to fix, the whole program crashed:
+self-correction did not work for syntax errors. The main evaluation never showed this
+because no query failed in it. **Fix:** `athena_tool.py` now turns the rejection into a
+normal tool error that Claude receives and can act on.
+
+**Still open:** in the 90 runs after the fix no query failed, so self-correction has
+not yet been observed end to end. The next step is a fault-injection test that makes
+`run_sql` fail on purpose once and checks that the agent retries and still answers correctly.
+
+**Lesson:** a perfect score on one run can hide rare failure paths. Repeating runs
+and forcing failures is how to find them.
+
 ## Validation: agent vs. manual analysis
 
 Before trusting the agent, each question was first answered by hand in pandas.
