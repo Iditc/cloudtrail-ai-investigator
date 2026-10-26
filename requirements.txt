@@ -8,6 +8,9 @@ anthropic==2.3.0
 # Vector DB for RAG (downloads the all-MiniLM-L6-v2 embedding model on first use)
 chromadb==1.5.9
 
+# MCP server (mcp 2.x: the server class is MCPServer)
+mcp==2.3.0
+
 # Local data exploration
 pandas==3.1.0
 pyarrow==26.0.0
