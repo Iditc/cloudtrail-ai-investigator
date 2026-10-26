@@ -55,7 +55,8 @@ def main() -> None:
         result = run_sql(sql)
     except AthenaQueryError as error:
         sys.exit(f"Athena error: {error}")
-    print(result.to_string(index=False))
+    # Cut long values (user agents, error messages) so each row fits on screen
+    print(result.to_string(index=False, max_colwidth=40))
 
 
 if __name__ == "__main__":

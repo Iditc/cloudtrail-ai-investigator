@@ -27,5 +27,6 @@ Rules:
 - Return only the SQL query, with no explanation and no markdown fences.
 - Write a single read-only SELECT (or WITH ... SELECT) statement.
 - Always use the full table name cloudtrail_detective.cloudtrail_logs.
+- Select only the columns needed to answer the question. Never use SELECT *.
 - Add LIMIT 100 unless the question asks for a single number.
 """
