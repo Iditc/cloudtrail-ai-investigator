@@ -24,6 +24,7 @@ KNOWLEDGE_DIR = PROJECT_ROOT / "knowledge"  # hand-written docs, committed to gi
 MITRE_JSON = RAW_DIR / "mitre" / "enterprise-attack.json"  # from github.com/mitre/cti
 CHROMA_DIR = PROJECT_ROOT / "chroma_db"  # local vector DB, not committed
 CHROMA_COLLECTION = "security_knowledge"
+RAG_METHOD = "hybrid"  # "vector", "bm25" or "hybrid"; hybrid had the best Recall@4 (eval/eval_retrieval.py)
 RESULTS_DIR = PROJECT_ROOT / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 

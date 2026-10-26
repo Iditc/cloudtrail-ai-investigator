@@ -1,0 +1,291 @@
+{
+  "summary": {
+    "vector": {
+      "recall@1": 0.556,
+      "recall@4": 0.833,
+      "mrr": 0.683
+    },
+    "bm25": {
+      "recall@1": 0.722,
+      "recall@4": 0.889,
+      "mrr": 0.8
+    },
+    "hybrid": {
+      "recall@1": 0.667,
+      "recall@4": 0.944,
+      "mrr": 0.796
+    }
+  },
+  "ranks": [
+    {
+      "method": "vector",
+      "query": "Who is the root user in this dataset?",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "Were the Level6 keys stolen, or given to challenge players?",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "What does the user name HIDDEN_DUE_TO_SECURITY_REASONS mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "What is flaws.cloud?",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "What is the difference between AKIA and ASIA access keys?",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "What does the RequestLimitExceeded error mean?",
+      "rank": 2.0
+    },
+    {
+      "method": "vector",
+      "query": "What does Client.DryRunOperation mean?",
+      "rank": 2.0
+    },
+    {
+      "method": "vector",
+      "query": "Does AccessDenied mean the call failed?",
+      "rank": NaN
+    },
+    {
+      "method": "vector",
+      "query": "An attacker called StopLogging to hide their activity",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "Which MITRE technique covers deleting a CloudTrail trail?",
+      "rank": 3.0
+    },
+    {
+      "method": "vector",
+      "query": "Thousands of RunInstances calls with stolen keys, probably cryptocurrency mining",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "Someone launched many EC2 instances with compromised credentials",
+      "rank": 8.0
+    },
+    {
+      "method": "vector",
+      "query": "The attacker first called GetCallerIdentity to see who they are",
+      "rank": NaN
+    },
+    {
+      "method": "vector",
+      "query": "Enumerating which IAM permissions the stolen keys have",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "Searching for public EBS disk snapshots",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "Listing S3 buckets and checking their ACL permissions",
+      "rank": 2.0
+    },
+    {
+      "method": "vector",
+      "query": "What does 'kali' in the user agent mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "vector",
+      "query": "Attacker logs in with valid stolen cloud account credentials",
+      "rank": 3.0
+    },
+    {
+      "method": "bm25",
+      "query": "Who is the root user in this dataset?",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "Were the Level6 keys stolen, or given to challenge players?",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "What does the user name HIDDEN_DUE_TO_SECURITY_REASONS mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "What is flaws.cloud?",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "What is the difference between AKIA and ASIA access keys?",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "What does the RequestLimitExceeded error mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "What does Client.DryRunOperation mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "Does AccessDenied mean the call failed?",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "An attacker called StopLogging to hide their activity",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "Which MITRE technique covers deleting a CloudTrail trail?",
+      "rank": 2.0
+    },
+    {
+      "method": "bm25",
+      "query": "Thousands of RunInstances calls with stolen keys, probably cryptocurrency mining",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "Someone launched many EC2 instances with compromised credentials",
+      "rank": NaN
+    },
+    {
+      "method": "bm25",
+      "query": "The attacker first called GetCallerIdentity to see who they are",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "Enumerating which IAM permissions the stolen keys have",
+      "rank": 4.0
+    },
+    {
+      "method": "bm25",
+      "query": "Searching for public EBS disk snapshots",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "Listing S3 buckets and checking their ACL permissions",
+      "rank": 2.0
+    },
+    {
+      "method": "bm25",
+      "query": "What does 'kali' in the user agent mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "bm25",
+      "query": "Attacker logs in with valid stolen cloud account credentials",
+      "rank": 7.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Who is the root user in this dataset?",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Were the Level6 keys stolen, or given to challenge players?",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "What does the user name HIDDEN_DUE_TO_SECURITY_REASONS mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "What is flaws.cloud?",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "What is the difference between AKIA and ASIA access keys?",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "What does the RequestLimitExceeded error mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "What does Client.DryRunOperation mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Does AccessDenied mean the call failed?",
+      "rank": 3.0
+    },
+    {
+      "method": "hybrid",
+      "query": "An attacker called StopLogging to hide their activity",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Which MITRE technique covers deleting a CloudTrail trail?",
+      "rank": 2.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Thousands of RunInstances calls with stolen keys, probably cryptocurrency mining",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Someone launched many EC2 instances with compromised credentials",
+      "rank": NaN
+    },
+    {
+      "method": "hybrid",
+      "query": "The attacker first called GetCallerIdentity to see who they are",
+      "rank": 2.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Enumerating which IAM permissions the stolen keys have",
+      "rank": 2.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Searching for public EBS disk snapshots",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Listing S3 buckets and checking their ACL permissions",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "What does 'kali' in the user agent mean?",
+      "rank": 1.0
+    },
+    {
+      "method": "hybrid",
+      "query": "Attacker logs in with valid stolen cloud account credentials",
+      "rank": 2.0
+    }
+  ]
+}

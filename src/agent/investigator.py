@@ -71,8 +71,8 @@ def execute_search_docs(tool_input: dict) -> tuple[str, bool]:
     query = tool_input["query"]
     print(f"\n  SEARCH: {query}")
     chunks = search_docs(query)
-    for chunk in chunks:
-        print(f"  -> {chunk['distance']:.2f}  {chunk['title']}")
+    for rank, chunk in enumerate(chunks, start=1):
+        print(f"  -> {rank}. {chunk['title']}")
     return format_for_llm(chunks), False
 
 

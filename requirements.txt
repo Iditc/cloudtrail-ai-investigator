@@ -7,6 +7,7 @@ anthropic==2.3.0
 
 # Vector DB for RAG (downloads the all-MiniLM-L6-v2 embedding model on first use)
 chromadb==1.5.9
+rank-bm25==0.2.2  # keyword search for hybrid retrieval
 
 # MCP server (mcp 2.x: the server class is MCPServer)
 mcp==2.3.0
