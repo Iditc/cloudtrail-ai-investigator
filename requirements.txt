@@ -2,6 +2,9 @@
 boto3[crt]==1.43.118
 python-dotenv==1.0.1
 
+# LLM (Claude API, used instead of Bedrock: the account has a 0 daily token quota)
+anthropic==2.3.0
+
 # Local data exploration
 pandas==3.1.0
 pyarrow==26.0.0

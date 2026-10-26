@@ -30,3 +30,7 @@ S3_ATHENA_RESULTS = f"s3://{S3_BUCKET}/athena-results/"
 
 ATHENA_DATABASE = os.getenv("ATHENA_DATABASE", "cloudtrail_detective")
 ATHENA_TABLE = os.getenv("ATHENA_TABLE", "cloudtrail_logs")
+ATHENA_MAX_ROWS = 100  # rows returned to the LLM, to keep prompts small
+
+# LLM settings (ANTHROPIC_API_KEY is read from .env by the SDK)
+CLAUDE_MODEL = "claude-sonnet-5-5"
