@@ -75,7 +75,8 @@ flowchart TB
 **How the loop works:** Claude decides which tool to call and when.
 `run_sql` returns facts: the result rows, or Athena's error message so Claude can
 fix the SQL. `search_docs` returns meaning: who an identity is, what an error code
-means, which MITRE ATT&CK technique fits. When Claude has enough, it writes the
+means, which MITRE ATT&CK technique fits. It uses hybrid search (keyword BM25 plus
+vector similarity, merged with Reciprocal Rank Fusion), chosen on day 7 by measurement. When Claude has enough, it writes the
 final answer. A safety limit stops the loop after 8 steps, and `run_sql` only
 accepts `SELECT` queries.
 
@@ -134,6 +135,7 @@ queries as it needs, then answers in plain English.
   replaced by T1685.002.
 - **Retrieval is imperfect.** For "thousands of RunInstances calls" the small
   embedding model ranked denial-of-service above Resource Hijacking (T1496).
+  Day 7 measured this and switched to hybrid search.
 - **The agent is not deterministic.** The same question can lead to a different
   search, so the right context is not always retrieved. This is why day 6 measures
   the agent on many questions instead of judging single runs.
@@ -141,6 +143,44 @@ queries as it needs, then answers in plain English.
 ### Day 5: MCP server ✅
 `src/mcp_server/server.py` (MCP Python SDK 2.x, stdio). Over stdio, stdout carries
 the MCP messages, so the tools' progress prints are redirected to stderr.
+
+### Day 6: evaluation ✅
+- `eval/questions.py`: 30 questions. Each one has a pandas function that computes the
+  facts a correct answer must contain (numbers, names, dates), straight from the data.
+- `eval/run_eval.py`: runs the agent on every question and checks that each fact
+  appears in the answer (numbers as whole numbers, dates in several formats). It also
+  records steps, tool calls, tokens, cost and time.
+- 20 basic questions plus 10 harder ones: multi-step chains, time logic, traps
+  (e.g. "how many DeleteBucket calls **succeeded**" where most failed), and a
+  question that needs the knowledge base.
+- The scorer was checked by reading answers by hand, to make sure passes are real.
+
+### Day 7: model comparison and retrieval quality ✅
+
+**Models** (`eval/compare_models.py`), all 30 questions:
+
+| Model | Accuracy | Cost for 30 questions | Avg time | Avg steps |
+|---|---|---|---|---|
+| Claude Haiku 5.5 | 30/30 | $0.026 | 14.9 s | 2.5 |
+| Claude Sonnet 5.5 | 30/30 | $0.404 | 14.1 s | 2.1 |
+
+Both models answered every question correctly; Haiku cost about 15 times less and
+needed slightly more steps. Caveat: the scoring checks facts, not the quality of the
+security explanation.
+
+**Retrieval** (`eval/eval_retrieval.py`): 18 search queries, each labelled with the
+knowledge chunks that answer it.
+
+| Search method | Recall@1 | Recall@4 (what the agent sees) | MRR |
+|---|---|---|---|
+| Vector (all-MiniLM-L6-v2) | 0.56 | 0.83 | 0.68 |
+| BM25 keywords | 0.72 | 0.89 | 0.80 |
+| **Hybrid (RRF)** | 0.67 | **0.94** | 0.80 |
+
+Vector search alone missed technical names such as `AccessDenied` and
+`GetCallerIdentity`, which keyword search finds exactly. Hybrid search combines both
+and is now the agent's default. One query still fails with every method: "someone
+launched many EC2 instances" has no technical keyword and its meaning is too vague.
 
 ## Validation: agent vs. manual analysis
 
