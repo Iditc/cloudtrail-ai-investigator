@@ -1,0 +1,370 @@
+[
+  {
+    "id": "q01",
+    "topic": "general",
+    "question": "How many events are in the CloudTrail logs in total?",
+    "facts": [
+      [
+        "1939207"
+      ]
+    ]
+  },
+  {
+    "id": "q02",
+    "topic": "general",
+    "question": "What is the date range of the logs (first and last event)?",
+    "facts": [
+      [
+        "2017-02-12",
+        "February 12, 2017",
+        "12 February 2017",
+        "Feb 12, 2017",
+        "12 Feb 2017"
+      ],
+      [
+        "2020-10-07",
+        "October 7, 2020",
+        "7 October 2020",
+        "Oct 7, 2020",
+        "7 Oct 2020"
+      ]
+    ]
+  },
+  {
+    "id": "q03",
+    "topic": "general",
+    "question": "Which AWS service (event source) has the most events?",
+    "facts": [
+      [
+        "ec2.amazonaws.com",
+        "ec2"
+      ]
+    ]
+  },
+  {
+    "id": "q04",
+    "topic": "general",
+    "question": "What is the most common API action (event name)?",
+    "facts": [
+      [
+        "RunInstances"
+      ]
+    ]
+  },
+  {
+    "id": "q05",
+    "topic": "general",
+    "question": "How many distinct source IP addresses appear in the logs?",
+    "facts": [
+      [
+        "9402"
+      ]
+    ]
+  },
+  {
+    "id": "q06",
+    "topic": "runinstances",
+    "question": "Which source IP address made the most RunInstances calls, and how many?",
+    "facts": [
+      [
+        "5.205.62.253"
+      ],
+      [
+        "1299186"
+      ]
+    ]
+  },
+  {
+    "id": "q07",
+    "topic": "runinstances",
+    "question": "On which day were there the most RunInstances calls?",
+    "facts": [
+      [
+        "2019-08-22",
+        "August 22, 2019",
+        "22 August 2019",
+        "Aug 22, 2019",
+        "22 Aug 2019"
+      ]
+    ]
+  },
+  {
+    "id": "q08",
+    "topic": "runinstances",
+    "question": "How many RunInstances calls succeeded in the whole dataset?",
+    "facts": [
+      [
+        "2",
+        "two"
+      ]
+    ]
+  },
+  {
+    "id": "q09",
+    "topic": "runinstances",
+    "question": "What is the most common error code for RunInstances calls?",
+    "facts": [
+      [
+        "Client.RequestLimitExceeded",
+        "RequestLimitExceeded"
+      ]
+    ]
+  },
+  {
+    "id": "q10",
+    "topic": "runinstances",
+    "question": "Which IAM users made RunInstances calls on the peak day of RunInstances activity?",
+    "facts": [
+      [
+        "Level6"
+      ],
+      [
+        "backup"
+      ]
+    ]
+  },
+  {
+    "id": "q11",
+    "topic": "identities",
+    "question": "Which IAM user made the most API calls, and how many?",
+    "facts": [
+      [
+        "backup"
+      ],
+      [
+        "915834"
+      ]
+    ]
+  },
+  {
+    "id": "q12",
+    "topic": "identities",
+    "question": "How many events were made by the root user (identity type Root)?",
+    "facts": [
+      [
+        "10997"
+      ]
+    ]
+  },
+  {
+    "id": "q13",
+    "topic": "identities",
+    "question": "How many events have the user name HIDDEN_DUE_TO_SECURITY_REASONS?",
+    "facts": [
+      [
+        "26"
+      ]
+    ]
+  },
+  {
+    "id": "q14",
+    "topic": "logging",
+    "question": "Who called StopLogging, and did it succeed?",
+    "facts": [
+      [
+        "Level6"
+      ],
+      [
+        "AccessDenied"
+      ]
+    ]
+  },
+  {
+    "id": "q15",
+    "topic": "logging",
+    "question": "Which identity deleted a CloudTrail trail (DeleteTrail) successfully, and on what date?",
+    "facts": [
+      [
+        "Root"
+      ],
+      [
+        "2019-08-23",
+        "August 23, 2019",
+        "23 August 2019",
+        "Aug 23, 2019",
+        "23 Aug 2019"
+      ]
+    ]
+  },
+  {
+    "id": "q16",
+    "topic": "recon",
+    "question": "How many DescribeSnapshots calls are in the logs?",
+    "facts": [
+      [
+        "102510"
+      ]
+    ]
+  },
+  {
+    "id": "q17",
+    "topic": "recon",
+    "question": "Which user name made the most GetCallerIdentity calls?",
+    "facts": [
+      [
+        "backup"
+      ]
+    ]
+  },
+  {
+    "id": "q18",
+    "topic": "recon",
+    "question": "Which source IP address received the most AccessDenied errors?",
+    "facts": [
+      [
+        "0.52.31.206"
+      ]
+    ]
+  },
+  {
+    "id": "q19",
+    "topic": "recon",
+    "question": "How many events came from a user agent that contains 'kali' (Kali Linux)?",
+    "facts": [
+      [
+        "96578"
+      ]
+    ]
+  },
+  {
+    "id": "q20",
+    "topic": "recon",
+    "question": "How many events failed (have an error code)?",
+    "facts": [
+      [
+        "1507714"
+      ]
+    ]
+  },
+  {
+    "id": "q21",
+    "topic": "hard_chain",
+    "question": "Take the IP address that made the most RunInstances calls. When did it first appear in the logs, which user did it use, and what was its very first action?",
+    "facts": [
+      [
+        "2019-08-21",
+        "August 21, 2019",
+        "21 August 2019",
+        "Aug 21, 2019",
+        "21 Aug 2019"
+      ],
+      [
+        "Level6"
+      ],
+      [
+        "GetCallerIdentity"
+      ]
+    ]
+  },
+  {
+    "id": "q22",
+    "topic": "hard_chain",
+    "question": "Which IP address called StopLogging, and how many events in total came from that IP?",
+    "facts": [
+      [
+        "2.251.2.5"
+      ],
+      [
+        "88"
+      ]
+    ]
+  },
+  {
+    "id": "q23",
+    "topic": "hard_chain",
+    "question": "Apart from RunInstances, what was the most common action of the IAM user Level6?",
+    "facts": [
+      [
+        "GetPolicyVersion"
+      ]
+    ]
+  },
+  {
+    "id": "q24",
+    "topic": "hard_time",
+    "question": "On 2019-08-22, in which hour of the day (UTC) were there the most RunInstances calls?",
+    "facts": [
+      [
+        "7",
+        "07",
+        "07:00",
+        "7:00"
+      ]
+    ]
+  },
+  {
+    "id": "q25",
+    "topic": "hard_time",
+    "question": "On how many distinct days (UTC) is there at least one event?",
+    "facts": [
+      [
+        "1330"
+      ]
+    ]
+  },
+  {
+    "id": "q26",
+    "topic": "hard_time",
+    "question": "Which calendar month had the most events, and how many events were in it?",
+    "facts": [
+      [
+        "2019-08",
+        "August 2019",
+        "Aug 2019"
+      ],
+      [
+        "1347680"
+      ]
+    ]
+  },
+  {
+    "id": "q27",
+    "topic": "hard_trap",
+    "question": "How many DeleteBucket calls succeeded?",
+    "facts": [
+      [
+        "4",
+        "four"
+      ]
+    ]
+  },
+  {
+    "id": "q28",
+    "topic": "hard_trap",
+    "question": "What exact user agent string was used for the StopLogging attempts?",
+    "facts": [
+      [
+        "aws-cli/1.16.168"
+      ],
+      [
+        "kali"
+      ]
+    ]
+  },
+  {
+    "id": "q29",
+    "topic": "hard_trap",
+    "question": "Excluding throttled calls (error code RequestLimitExceeded), how many distinct source IP addresses made RunInstances calls?",
+    "facts": [
+      [
+        "738"
+      ]
+    ]
+  },
+  {
+    "id": "q30",
+    "topic": "hard_rag",
+    "question": "In this dataset, which identity is most likely the legitimate account owner, and which IAM users had their access keys exposed to challenge players?",
+    "facts": [
+      [
+        "root"
+      ],
+      [
+        "Level6"
+      ],
+      [
+        "backup"
+      ]
+    ]
+  }
+]

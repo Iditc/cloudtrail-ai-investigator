@@ -104,22 +104,37 @@ def run_tool_calls(response) -> list:
     return results
 
 
-def ask_agent(question: str) -> str:
-    """Run the agent loop for one question and return Claude's final answer."""
+def run_agent(question: str) -> dict:
+    """Run the agent loop for one question.
+
+    Returns the final answer plus run statistics (steps, tool calls, tokens),
+    which the evaluation uses to measure cost and behaviour.
+    """
     client = anthropic.Anthropic()
     messages = [{"role": "user", "content": question}]
+    stats = {"steps": 0, "tool_calls": [], "input_tokens": 0, "output_tokens": 0}
     for step in range(1, MAX_STEPS + 1):
         print(f"\n[step {step}]", end="")
         response = call_claude(client, messages)
+        stats["steps"] = step
+        stats["input_tokens"] += response.usage.input_tokens
+        stats["output_tokens"] += response.usage.output_tokens
         # Keep Claude's full turn (including tool calls) in the history
         messages.append({"role": "assistant", "content": response.content})
 
         if response.stop_reason == "refusal":
-            return f"The model declined: {response.stop_details}"
+            return {"answer": f"The model declined: {response.stop_details}", **stats}
         if response.stop_reason != "tool_use":
-            return "".join(b.text for b in response.content if b.type == "text")
+            answer = "".join(b.text for b in response.content if b.type == "text")
+            return {"answer": answer, **stats}
+        stats["tool_calls"] += [b.name for b in response.content if b.type == "tool_use"]
         messages.append({"role": "user", "content": run_tool_calls(response)})
-    return f"Stopped after {MAX_STEPS} steps without a final answer."
+    return {"answer": f"Stopped after {MAX_STEPS} steps without a final answer.", **stats}
+
+
+def ask_agent(question: str) -> str:
+    """Run the agent loop for one question and return only Claude's final answer."""
+    return run_agent(question)["answer"]
 
 
 def main() -> None:
