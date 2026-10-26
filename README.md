@@ -56,19 +56,17 @@ on *who* did it and *whether it succeeded*.
 ## Architecture (current state, day 3)
 
 ```mermaid
-flowchart LR
-    Q["Analyst question<br/>(plain English)"] --> C
+flowchart TB
+    Q["Analyst question"] --> C
 
-    subgraph LOOP["Agent loop: src/agent/investigator.py"]
-        direction TB
-        C["Claude Sonnet 5.5<br/>(Claude API)"] -- "tool call: SQL" --> T["run_sql tool<br/>(read-only check)"]
-        T -- "rows, or the error<br/>so Claude can fix it" --> C
+    subgraph LOOP["Agent loop (investigator.py)"]
+        C["Claude Sonnet 5.5"] -- "SQL" --> T["run_sql tool"]
+        T -- "rows or error" --> C
     end
 
     T --> ATH["Amazon Athena"]
-    ATH --> S3[("S3: CloudTrail logs<br/>20 files, 1.9M events")]
-    ATH -. "table schema" .-> GLUE["Glue Data Catalog"]
-    C -- "final answer" --> A["Answer with evidence<br/>(numbers, users, IPs)"]
+    ATH --> S3[("S3: 1.9M events")]
+    C -- "final answer" --> A["Answer with evidence"]
 ```
 
 **How the loop works:** Claude decides when to query. Each `run_sql` call returns
