@@ -1,7 +1,8 @@
-"""Day 3: the agent loop.
+"""The agent loop (day 3) with RAG (day 4).
 
-Claude gets one tool, run_sql. It decides when to call it, sees the result
-(or the error), can fix and retry, and finally answers in plain English.
+Claude gets two tools: run_sql (facts from Athena) and search_docs (meaning,
+from the vector knowledge base). It decides when to call each one, sees the
+result (or the error), can fix and retry, and finally answers in plain English.
 The loop is written by hand on purpose, to show what an "agent" really is.
 
 Run from the project root:
@@ -16,6 +17,7 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 import config  # noqa: E402  (also loads ANTHROPIC_API_KEY from .env)
 from agent.prompts import AGENT_SYSTEM_PROMPT  # noqa: E402
 from tools.athena_tool import AthenaQueryError, run_sql  # noqa: E402
+from tools.rag_tool import format_for_llm, search_docs  # noqa: E402
 
 MAX_STEPS = 8  # safety limit: stop the loop even if Claude keeps calling tools
 
@@ -34,6 +36,22 @@ RUN_SQL_TOOL = {
     },
 }
 
+SEARCH_DOCS_TOOL = {
+    "name": "search_docs",
+    "description": (
+        "Semantic search in a knowledge base: context about this dataset and its identities, "
+        "what CloudTrail actions and error codes mean, and MITRE ATT&CK cloud techniques. "
+        "Returns the 4 closest text chunks with their source."
+    ),
+    "strict": True,
+    "input_schema": {
+        "type": "object",
+        "properties": {"query": {"type": "string", "description": "What to look up, in plain English."}},
+        "required": ["query"],
+        "additionalProperties": False,
+    },
+}
+
 
 def execute_run_sql(tool_input: dict) -> tuple[str, bool]:
     """Run the SQL from a tool call. Return (text for Claude, is_error)."""
@@ -48,8 +66,21 @@ def execute_run_sql(tool_input: dict) -> tuple[str, bool]:
     return f"{len(result)} rows:\n{result.to_csv(index=False)}", False
 
 
+def execute_search_docs(tool_input: dict) -> tuple[str, bool]:
+    """Search the knowledge base. Return (text for Claude, is_error)."""
+    query = tool_input["query"]
+    print(f"\n  SEARCH: {query}")
+    chunks = search_docs(query)
+    for chunk in chunks:
+        print(f"  -> {chunk['distance']:.2f}  {chunk['title']}")
+    return format_for_llm(chunks), False
+
+
+TOOL_FUNCTIONS = {"run_sql": execute_run_sql, "search_docs": execute_search_docs}
+
+
 def call_claude(client: anthropic.Anthropic, messages: list):
-    """Send the conversation so far to Claude, with the run_sql tool available."""
+    """Send the conversation so far to Claude, with both tools available."""
     return client.beta.messages.create(
         model=config.CLAUDE_MODEL,
         max_tokens=16000,
@@ -57,7 +88,7 @@ def call_claude(client: anthropic.Anthropic, messages: list):
         betas=["server-side-fallback-2026-07-01"],
         fallbacks="default",
         system=AGENT_SYSTEM_PROMPT,
-        tools=[RUN_SQL_TOOL],
+        tools=[RUN_SQL_TOOL, SEARCH_DOCS_TOOL],
         messages=messages,
     )
 
@@ -67,7 +98,7 @@ def run_tool_calls(response) -> list:
     results = []
     for block in response.content:
         if block.type == "tool_use":
-            text, is_error = execute_run_sql(block.input)
+            text, is_error = TOOL_FUNCTIONS[block.name](block.input)
             results.append({"type": "tool_result", "tool_use_id": block.id,
                             "content": text, "is_error": is_error})
     return results

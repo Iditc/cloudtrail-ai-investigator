@@ -5,6 +5,9 @@ python-dotenv==1.0.1
 # LLM (Claude API, used instead of Bedrock: the account has a 0 daily token quota)
 anthropic==2.3.0
 
+# Vector DB for RAG (downloads the all-MiniLM-L6-v2 embedding model on first use)
+chromadb==1.5.9
+
 # Local data exploration
 pandas==3.1.0
 pyarrow==26.0.0

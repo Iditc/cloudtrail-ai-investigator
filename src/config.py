@@ -18,6 +18,12 @@ LOGS_EXTRACTED_DIR = RAW_DIR / "extracted"
 PROCESSED_DIR = DATA_DIR / "processed"
 EVENTS_PARQUET = PROCESSED_DIR / "cloudtrail_events.parquet"
 DOCS_DIR = DATA_DIR / "docs"
+
+# RAG knowledge base
+KNOWLEDGE_DIR = PROJECT_ROOT / "knowledge"  # hand-written docs, committed to git
+MITRE_JSON = RAW_DIR / "mitre" / "enterprise-attack.json"  # from github.com/mitre/cti
+CHROMA_DIR = PROJECT_ROOT / "chroma_db"  # local vector DB, not committed
+CHROMA_COLLECTION = "security_knowledge"
 RESULTS_DIR = PROJECT_ROOT / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 
