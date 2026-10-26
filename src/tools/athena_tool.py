@@ -8,6 +8,7 @@ from pathlib import Path
 
 import boto3
 import pandas as pd
+from botocore.exceptions import ClientError
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 import config  # noqa: E402
@@ -60,11 +61,17 @@ def run_sql(sql: str, max_rows: int = config.ATHENA_MAX_ROWS) -> pd.DataFrame:
     """
     check_read_only(sql)
     athena = get_athena_client()
-    query_id = athena.start_query_execution(
-        QueryString=sql,
-        QueryExecutionContext={"Database": config.ATHENA_DATABASE},
-        ResultConfiguration={"OutputLocation": config.S3_ATHENA_RESULTS},
-    )["QueryExecutionId"]
+    try:
+        query_id = athena.start_query_execution(
+            QueryString=sql,
+            QueryExecutionContext={"Database": config.ATHENA_DATABASE},
+            ResultConfiguration={"OutputLocation": config.S3_ATHENA_RESULTS},
+        )["QueryExecutionId"]
+    except ClientError as error:
+        # Syntax errors are rejected at submission time, before the query runs
+        if error.response["Error"]["Code"] == "InvalidRequestException":
+            raise AthenaQueryError(error.response["Error"]["Message"]) from error
+        raise
     status = wait_for_query(athena, query_id)
     if status["State"] != "SUCCEEDED":
         raise AthenaQueryError(status.get("StateChangeReason", status["State"]))

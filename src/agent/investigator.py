@@ -118,7 +118,7 @@ def run_agent(question: str) -> dict:
     """
     client = anthropic.Anthropic()
     messages = [{"role": "user", "content": question}]
-    stats = {"steps": 0, "tool_calls": [], "input_tokens": 0, "output_tokens": 0}
+    stats = {"steps": 0, "tool_calls": [], "tool_errors": 0, "input_tokens": 0, "output_tokens": 0}
     for step in range(1, MAX_STEPS + 1):
         print(f"\n[step {step}]", end="")
         response = call_claude(client, messages)
@@ -134,7 +134,10 @@ def run_agent(question: str) -> dict:
             answer = "".join(b.text for b in response.content if b.type == "text")
             return {"answer": answer, **stats}
         stats["tool_calls"] += [b.name for b in response.content if b.type == "tool_use"]
-        messages.append({"role": "user", "content": run_tool_calls(response)})
+        tool_results = run_tool_calls(response)
+        # Failed tool calls (e.g. invalid SQL) that Claude must recover from
+        stats["tool_errors"] += sum(r["is_error"] for r in tool_results)
+        messages.append({"role": "user", "content": tool_results})
     return {"answer": f"Stopped after {MAX_STEPS} steps without a final answer.", **stats}
 
 

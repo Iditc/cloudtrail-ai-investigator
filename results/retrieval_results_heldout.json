@@ -1,0 +1,141 @@
+{
+  "summary": {
+    "vector": {
+      "recall@1": 0.875,
+      "recall@4": 1.0,
+      "mrr": 0.938
+    },
+    "bm25": {
+      "recall@1": 0.875,
+      "recall@4": 1.0,
+      "mrr": 0.938
+    },
+    "hybrid": {
+      "recall@1": 1.0,
+      "recall@4": 1.0,
+      "mrr": 1.0
+    }
+  },
+  "ranks": [
+    {
+      "method": "vector",
+      "query": "Why would someone call DescribeTrails and GetTrailStatus?",
+      "rank": 1
+    },
+    {
+      "method": "vector",
+      "query": "Is a console sign-in with a user name that doesn't exist logged?",
+      "rank": 1
+    },
+    {
+      "method": "vector",
+      "query": "What does InsufficientInstanceCapacity mean?",
+      "rank": 2
+    },
+    {
+      "method": "vector",
+      "query": "Who created the flaws.cloud challenge?",
+      "rank": 1
+    },
+    {
+      "method": "vector",
+      "query": "Are ASIA keys temporary credentials from STS?",
+      "rank": 1
+    },
+    {
+      "method": "vector",
+      "query": "Checking whether a disk snapshot is shared publicly",
+      "rank": 1
+    },
+    {
+      "method": "vector",
+      "query": "What does botocore in the user agent tell me?",
+      "rank": 1
+    },
+    {
+      "method": "vector",
+      "query": "Spinning up virtual machines to mine cryptocurrency",
+      "rank": 1
+    },
+    {
+      "method": "bm25",
+      "query": "Why would someone call DescribeTrails and GetTrailStatus?",
+      "rank": 1
+    },
+    {
+      "method": "bm25",
+      "query": "Is a console sign-in with a user name that doesn't exist logged?",
+      "rank": 1
+    },
+    {
+      "method": "bm25",
+      "query": "What does InsufficientInstanceCapacity mean?",
+      "rank": 1
+    },
+    {
+      "method": "bm25",
+      "query": "Who created the flaws.cloud challenge?",
+      "rank": 2
+    },
+    {
+      "method": "bm25",
+      "query": "Are ASIA keys temporary credentials from STS?",
+      "rank": 1
+    },
+    {
+      "method": "bm25",
+      "query": "Checking whether a disk snapshot is shared publicly",
+      "rank": 1
+    },
+    {
+      "method": "bm25",
+      "query": "What does botocore in the user agent tell me?",
+      "rank": 1
+    },
+    {
+      "method": "bm25",
+      "query": "Spinning up virtual machines to mine cryptocurrency",
+      "rank": 1
+    },
+    {
+      "method": "hybrid",
+      "query": "Why would someone call DescribeTrails and GetTrailStatus?",
+      "rank": 1
+    },
+    {
+      "method": "hybrid",
+      "query": "Is a console sign-in with a user name that doesn't exist logged?",
+      "rank": 1
+    },
+    {
+      "method": "hybrid",
+      "query": "What does InsufficientInstanceCapacity mean?",
+      "rank": 1
+    },
+    {
+      "method": "hybrid",
+      "query": "Who created the flaws.cloud challenge?",
+      "rank": 1
+    },
+    {
+      "method": "hybrid",
+      "query": "Are ASIA keys temporary credentials from STS?",
+      "rank": 1
+    },
+    {
+      "method": "hybrid",
+      "query": "Checking whether a disk snapshot is shared publicly",
+      "rank": 1
+    },
+    {
+      "method": "hybrid",
+      "query": "What does botocore in the user agent tell me?",
+      "rank": 1
+    },
+    {
+      "method": "hybrid",
+      "query": "Spinning up virtual machines to mine cryptocurrency",
+      "rank": 1
+    }
+  ]
+}

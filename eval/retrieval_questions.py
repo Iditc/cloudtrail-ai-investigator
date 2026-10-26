@@ -35,3 +35,16 @@ RETRIEVAL_QUESTIONS = [
     {"query": "What does 'kali' in the user agent mean?", "relevant": [AGENTS]},
     {"query": "Attacker logs in with valid stolen cloud account credentials", "relevant": ["mitre:T1078.004"]},
 ]
+
+# Held-out set: written after the knowledge docs were tuned (day 8), never used to change them.
+# It shows whether retrieval quality holds on queries the fixes did not see.
+RETRIEVAL_HELDOUT = [
+    {"query": "Why would someone call DescribeTrails and GetTrailStatus?", "relevant": [LOGGING]},
+    {"query": "Is a console sign-in with a user name that doesn't exist logged?", "relevant": [IDENTITIES]},
+    {"query": "What does InsufficientInstanceCapacity mean?", "relevant": [ERRORS]},
+    {"query": "Who created the flaws.cloud challenge?", "relevant": [FLAWS]},
+    {"query": "Are ASIA keys temporary credentials from STS?", "relevant": [KEYS]},
+    {"query": "Checking whether a disk snapshot is shared publicly", "relevant": [RECON, "mitre:T1580"]},
+    {"query": "What does botocore in the user agent tell me?", "relevant": [AGENTS]},
+    {"query": "Spinning up virtual machines to mine cryptocurrency", "relevant": [ABUSE, "mitre:T1496", "mitre:T1496.001"]},
+]
