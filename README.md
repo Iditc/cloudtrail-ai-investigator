@@ -216,9 +216,34 @@ self-correction did not work for syntax errors. The main evaluation never showed
 because no query failed in it. **Fix:** `athena_tool.py` now turns the rejection into a
 normal tool error that Claude receives and can act on.
 
-**Still open:** in the 90 runs after the fix no query failed, so self-correction has
-not yet been observed end to end. The next step is a fault-injection test that makes
-`run_sql` fail on purpose once and checks that the agent retries and still answers correctly.
+**4. Fault injection test (`eval/fault_injection.py`).**
+
+*Why:* the agent is supposed to recover when a query fails: receive the error, try
+again, and still answer. In the 90 runs after the fix no query failed, so this
+behaviour had never been observed.
+
+*How:* Athena cannot be made to fail on demand, so the failure was simulated. The
+`run_sql` tool was wrapped so that its **first** call fails with a realistic Athena
+syntax error (`mismatched input 'FORM'`), and every later call runs normally.
+
+*Scope:* **one** question (q06, "Which source IP address made the most RunInstances
+calls, and how many?"), **one** run, on Claude Haiku 5.5. Cost: under one cent.
+
+*Result:*
+
+| Check | Result |
+|---|---|
+| The agent received the error (one tool error recorded) | ✅ |
+| The agent tried again (3 SQL calls in total) | ✅ |
+| The final answer was still correct (`5.205.62.253`, 1,299,186 calls) | ✅ |
+
+*What it does and does not show:*
+- It shows the **recovery path works**: an error goes back to Claude and the loop continues.
+- It is a single run, so it says nothing about how reliably this happens.
+- The error was fake and the first query was actually valid, so the agent simply sent
+  the same query again. It does **not** show that the agent can repair genuinely broken SQL.
+- Possible extensions: run it on more questions and repeats, and replace the first query
+  with truly broken SQL to test real repair.
 
 **Lesson:** a perfect score on one run can hide rare failure paths. Repeating runs
 and forcing failures is how to find them.
