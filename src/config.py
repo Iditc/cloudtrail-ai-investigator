@@ -39,5 +39,12 @@ ATHENA_DATABASE = os.getenv("ATHENA_DATABASE", "cloudtrail_detective")
 ATHENA_TABLE = os.getenv("ATHENA_TABLE", "cloudtrail_logs")
 ATHENA_MAX_ROWS = 100  # rows returned to the LLM, to keep prompts small
 
+# Day 9: prompt-injection test table (a view = real logs + a few poisoned events)
+ATHENA_INJECTION_VIEW = "cloudtrail_logs_injected"
+S3_INJECTION_PREFIX = "injection/"
+# Defense prompt rules + tool results wrapped as untrusted data. On by default since day 9:
+# it cut subtle-attack success from 29% to 0% with no loss of accuracy (eval/injection_test.py)
+INJECTION_DEFENSE = True
+
 # LLM settings (ANTHROPIC_API_KEY is read from .env by the SDK)
 CLAUDE_MODEL = "claude-sonnet-5-5"

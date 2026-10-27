@@ -67,7 +67,8 @@ def summarize(results: list[dict]) -> dict:
     """Overall metrics across all evaluated questions."""
     n = len(results)
     facts = [f for r in results for f in r["found"]]
-    return {"model": config.CLAUDE_MODEL, "questions": n,
+    label = f"{config.CLAUDE_MODEL}+defense" if config.INJECTION_DEFENSE else config.CLAUDE_MODEL
+    return {"model": label, "questions": n,
             "accuracy": round(sum(r["passed"] for r in results) / n, 3),
             "fact_recall": round(sum(facts) / len(facts), 3),
             "total_cost_usd": round(sum(r["cost_usd"] for r in results), 3),
@@ -80,6 +81,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("ids", nargs="*", help="question ids to run (default: all)")
     parser.add_argument("--model", default=config.CLAUDE_MODEL, choices=sorted(PRICES))
+    parser.add_argument("--defense", action="store_true", help="turn on the prompt-injection defenses")
     return parser.parse_args()
 
 
@@ -87,10 +89,12 @@ def main() -> None:
     """Run the selected questions, print a table and save all results."""
     args = parse_args()
     config.CLAUDE_MODEL = args.model  # the agent reads the model from config at call time
+    config.INJECTION_DEFENSE = args.defense
     items = json.loads(EXPECTED_PATH.read_text(encoding="utf-8"))
     if args.ids:
         items = [i for i in items if i["id"] in args.ids]
-    results_path = config.RESULTS_DIR / f"eval_{args.model}.json"
+    label = f"{args.model}+defense" if args.defense else args.model
+    results_path = config.RESULTS_DIR / f"eval_{label}.json"
     results = []
     for item in items:
         r = run_question(item)
