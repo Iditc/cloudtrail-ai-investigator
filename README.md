@@ -1,12 +1,38 @@
 # CloudTrail AI Investigator
 
-An AI agent that answers natural-language questions about AWS CloudTrail logs.
-It writes SQL, runs it on Athena, looks up background knowledge with RAG, and
-explains what it finds in plain English. Its tools are also exposed through an MCP server.
+An AI agent that answers a security analyst's questions about AWS CloudTrail logs in
+plain English. It writes SQL and runs it on Amazon Athena over 1.9 million real events,
+looks up background knowledge with hybrid RAG (BM25 + vectors, MITRE ATT&CK), and
+explains what it finds with evidence. Its tools are also exposed through an MCP server.
 
-Learning project covering: Agents, AWS (S3, Athena, IAM), MCP, LLM, RAG, and a vector DB (Chroma).
+Built as a learning project for agents, AWS (S3, Athena, IAM), MCP, LLMs, RAG and a
+vector database, with a data scientist's focus on **measuring** each part.
 
-> Work in progress. Results, diagram and demo will be added as the project progresses.
+## Results at a glance
+
+| What was measured | Result |
+|---|---|
+| Answer accuracy on 30 questions (answers computed independently in pandas) | **30/30** with Claude Sonnet 5.5 and with Claude Haiku 5.5 |
+| Cost of all 30 questions | **$0.026** with Haiku 5.5, about 15× cheaper than Sonnet 5.5 ($0.40) |
+| Consistency: every question run 3 times | 90/90 correct; the number of steps varies between runs |
+| Retrieval Recall@4 (right knowledge chunk in the 4 the agent sees) | 0.83 (vectors only) → **1.00** (hybrid search + document expansion) |
+| Prompt injection hidden in log fields, subtle variant | Attack success **29% → 0%** after adding defenses, with no loss of accuracy |
+| Hidden bug found by repeated runs | Athena syntax errors crashed the agent instead of being corrected; fixed and verified by fault injection |
+
+## Demo
+
+A real run (`python src/make_demo.py`): the agent queries Athena twice, searches the
+knowledge base, and answers with evidence and the MITRE technique.
+
+![Agent demo](assets/demo.svg)
+
+## Contents
+- [Project goal](#project-goal) and [Data](#data)
+- [Architecture](#architecture)
+- [Quick start](#quick-start) and [Project structure](#project-structure)
+- [Progress log, day by day](#progress), including evaluation, retrieval, and prompt injection
+- [Validation: agent vs. manual analysis](#validation-agent-vs-manual-analysis)
+- [Limitations and next steps](#limitations-and-next-steps)
 
 ## Project goal
 
@@ -53,14 +79,14 @@ turn off logging to hide their tracks, and was blocked. By contrast, a successfu
 owner doing maintenance. The same kind of action means different things depending
 on *who* did it and *whether it succeeded*.
 
-## Architecture (current state, day 5)
+## Architecture
 
 ```mermaid
 flowchart TB
     Q["Analyst question"] --> C
 
     subgraph LOOP["Agent loop (investigator.py)"]
-        C["Claude Sonnet 5.5"] -- "SQL" --> T["run_sql"]
+        C["Claude (Sonnet or Haiku 5.5)"] -- "SQL" --> T["run_sql"]
         T -- "rows or error" --> C
         C -- "query" --> R["search_docs"]
         R -- "4 chunks" --> C
@@ -78,7 +104,9 @@ fix the SQL. `search_docs` returns meaning: who an identity is, what an error co
 means, which MITRE ATT&CK technique fits. It uses hybrid search (keyword BM25 plus
 vector similarity, merged with Reciprocal Rank Fusion), chosen on day 7 by measurement. When Claude has enough, it writes the
 final answer. A safety limit stops the loop after 8 steps, and `run_sql` only
-accepts `SELECT` queries.
+accepts `SELECT` queries. Prompt-injection defenses (day 9) are on by default: the
+system prompt says log fields are attacker-controlled data, and every tool result is
+wrapped in `<untrusted_data>` tags.
 
 **MCP server** (`src/mcp_server/server.py`): exposes `run_sql`, `search_docs` and
 `investigate` (the whole agent) to any MCP host over stdio. The host's own model
@@ -96,6 +124,67 @@ flowchart LR
 **Why the Claude API and not Bedrock:** the AWS account (new free plan) has a daily
 token quota of 0 for every Bedrock model, and the quota is not adjustable. The
 agent calls Claude through the Anthropic API instead; Athena and S3 still run on AWS.
+
+## Quick start
+
+**You need:** an AWS account, AWS CLI 2.32 or newer (for `aws login`), Python 3.12,
+and an Anthropic API key.
+
+```bash
+# 1. Environment
+python -m venv .venv
+.venv\Scripts\activate            # on macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+
+# 2. Settings: copy .env.example to .env and fill in S3_BUCKET and ANTHROPIC_API_KEY
+# 3. AWS sign-in with short-lived credentials
+aws login --profile cloudtrail-detective
+aws s3 mb s3://<your-bucket> --profile cloudtrail-detective
+
+# 4. Data: download flaws_cloudtrail_logs.tar from summitroute.com into data/raw/, then
+python src/setup_aws/upload_logs.py
+#    In the Athena console: set the query result location, then run src/setup_aws/create_table.sql
+
+# 5. Knowledge base: download enterprise-attack.json from github.com/mitre/cti into data/raw/mitre/, then
+python src/rag/build_index.py
+
+# 6. Ask a question
+python src/agent/investigator.py "Did anyone try to stop CloudTrail logging?"
+```
+
+**Evaluation scripts** (step 7, optional):
+
+```bash
+python src/data/build_parquet.py                          # local Parquet copy for pandas
+python eval/build_expected.py                             # expected answers from the data
+python eval/run_eval.py --model claude-haiku-5-5          # 30-question evaluation
+python eval/eval_retrieval.py                             # retrieval quality
+python src/setup_aws/build_injection_table.py subtle      # prompt-injection test data
+python eval/injection_test.py --variant subtle            # prompt-injection test
+```
+
+## Project structure
+
+```text
+cloudtrail-detective/
+├── src/
+│   ├── config.py                 # paths, AWS settings, model, RAG method, defenses
+│   ├── setup_aws/                # upload logs, Athena table, injection test table
+│   ├── data/build_parquet.py     # flat Parquet copy of the logs for pandas
+│   ├── eda/explore.py            # manual exploration in pandas
+│   ├── tools/
+│   │   ├── athena_tool.py        # run_sql: read-only SQL on Athena
+│   │   └── rag_tool.py           # search_docs: vector, BM25 and hybrid search
+│   ├── rag/build_index.py        # knowledge docs + MITRE ATT&CK into Chroma
+│   ├── agent/
+│   │   ├── prompts.py            # system prompts and injection defense rules
+│   │   ├── text_to_sql.py        # day 2: one question, one query
+│   │   └── investigator.py       # the agent loop with both tools
+│   └── mcp_server/               # MCP server and a test client
+├── knowledge/                    # hand-written knowledge docs for RAG
+├── eval/                         # questions, evaluation, retrieval, consistency, injection tests
+└── results/                      # saved evaluation results and figures
+```
 
 ## Progress
 
@@ -333,3 +422,30 @@ The agent's answers were then compared with those results.
   Root's `DeleteTrail` as possibly the owner's own maintenance, and named the MITRE
   technique with its source. When its search did not retrieve the identities
   section, it still called it the main concern.
+
+## Limitations and next steps
+
+**Limitations**
+- **The evaluation checks facts, not reasoning.** A question passes when the right
+  numbers, names and dates appear. The quality of the security interpretation was
+  checked only by reading answers and by the LLM judge in the injection test.
+- **The questions are easy for current models.** Both models scored 30/30, so the
+  benchmark cannot yet separate them. Harder, more open-ended questions are needed.
+- **Small samples.** Consistency used 3 repeats; the injection test 10–15 runs per cell
+  and one model.
+- **Author bias.** The test questions, the held-out retrieval queries and the injection
+  payloads were all written by the same person who built the system.
+- **Broad AWS permissions.** The CLI role (`AccountFullAccessRole`) can do much more than
+  the agent needs. Only the tool's `SELECT` check limits it.
+- **No Bedrock.** The new AWS free plan has a 0 daily token quota for Bedrock models, so
+  the LLM runs on the Anthropic API.
+- **MCP not connected to a desktop host.** The MCP server works with a test client, but
+  registering it in Claude Desktop made the app hang at startup, so it was left out.
+
+**Next steps**
+- A least-privilege role for the agent: read only this Athena table and its S3 prefix.
+- Attack the `SELECT`-only check with destructive and multi-statement SQL.
+- Convert the logs to Parquet on S3 to cut Athena scan cost (only needed columns are read).
+- An LLM-as-judge score for explanation quality, and harder multi-step questions.
+- An unsupervised anomaly detection layer (for example Isolation Forest on per-identity
+  behaviour), with the agent explaining what it finds.

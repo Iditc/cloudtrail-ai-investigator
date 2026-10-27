@@ -12,6 +12,9 @@ rank-bm25==0.2.2  # keyword search for hybrid retrieval
 # MCP server (mcp 2.x: the server class is MCPServer)
 mcp==2.3.0
 
+# Demo image (src/make_demo.py)
+rich==15.0.0
+
 # Local data exploration
 pandas==3.1.0
 pyarrow==26.0.0
